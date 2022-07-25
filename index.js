@@ -1,4 +1,4 @@
-const database = require('services/atpro.database');
+const database = require('./services/atpro.database');
 
 /**
  * create new record

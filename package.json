@@ -1,6 +1,6 @@
 {
   "name": "@atpro/orm",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Atpro orm is a orm for nodejs",
   "main": "index.js",
   "scripts": {
