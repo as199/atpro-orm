@@ -1,8 +1,8 @@
 {
   "name": "@atpro/orm",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Atpro orm is a orm for nodejs",
-  "main": "services/index.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
