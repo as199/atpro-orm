@@ -2,7 +2,7 @@
   "name": "@atpro/orm",
   "version": "1.0.0",
   "description": "Atpro orm is a orm for nodejs",
-  "main": "services/atpro.orm.js",
+  "main": "services/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
