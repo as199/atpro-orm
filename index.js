@@ -24,12 +24,13 @@ const add =  (tableName,data, results) => {
 }
 
 /**
- * @param {string[]} tableName the name of the table
+ * @param {string} tableName the name of the table
+ * @param {string} column the column name default id
  * @param {function} results callable
  */
-const findLastRows = (tableName, results) => {
-    let sql =`SELECT * FROM ${tableName} ORDER BY id DESC LIMIT 1`;
-    database.query(sql,[id], function (err, rows) {
+const findLastRows = (tableName, column = 'id', results) => {
+    let sql =`SELECT * FROM ${tableName} ORDER BY ${column} DESC LIMIT 1`;
+    database.query(sql, function (err, rows) {
         if (err) {
             results(null, err);
         } else {
@@ -85,7 +86,7 @@ const count = ([tableName, column=null, value=null], results) =>{
  */
 const findAll =  ([tableName], results) => {
     let sql = `SELECT * FROM ${tableName}`;
-      database.query(sql, function (err, rows) {
+    database.query(sql, function (err, rows) {
         if (err) {
             results(null, err);
         } else {
@@ -113,20 +114,19 @@ const findAllBy =  (tableName,[column, value, order=0], results) => {
             results(null, rows);
         }
 
-});
+    });
 }
 
 /**
  *
  * @param {string} tableName the name of the table
- * @param column
- * @param value
- * @param limit
- * @param results
+ * @param {string} column the column name for ordering the results
+ * @param {string} limit the limit of the results
+ * @param {function} results callable
  */
-const findLimitBy =  (tableName,[column, value], results) => {
-    let sql = `SELECT * FROM ${tableName}  ORDER BY ${column} DESC LIMIT ${value}`;
-    database.query(sql,[value], function (err, rows) {
+const findLimitBy =  (tableName,[column, limit], results) => {
+    let sql = `SELECT * FROM ${tableName}  ORDER BY ${column} DESC LIMIT ${limit}`;
+    database.query(sql, function (err, rows) {
         if (err) {
             results(null, err);
         } else {
@@ -140,14 +140,13 @@ const findLimitBy =  (tableName,[column, value], results) => {
 /**
  *
  * @param {string} tableName the name of the table
- * @param column
- * @param value
- * @param limit
+ * @param {Object} column
  * @param results
  */
-const findBy =  (tableName,[column, value, limit=0], results) => {
-    let sql = `SELECT * FROM ${tableName} WHERE ${column}=?`;
-    database.query(sql,[value], function (err, rows) {
+const findBy =  (tableName,column, results) => {
+    const {conditions, values}= getConditions(column);
+    let sql = `SELECT * FROM ${tableName} WHERE ${conditions}`;
+    database.query(sql,values, function (err, rows) {
         if (err) {
             results(null, err);
         } else {
@@ -161,11 +160,12 @@ const findBy =  (tableName,[column, value, limit=0], results) => {
 /**
  *
  * @param {string} tableName the name of the table
- * @param value []
- * @param results callable
+ * @param {string} column the value of the column default id
+ * @param {string|number} value the value of the column
+ * @param {function} results callable
  */
-const find =  (tableName, value, results) => {
-      database.query(`SELECT * FROM ${tableName} WHERE id =?`,[value], function (err, rows) {
+const find =  (tableName, value,column='id', results) => {
+    database.query(`SELECT * FROM ${tableName} WHERE ${column} =?`,[value], function (err, rows) {
         if (err) {
             results(null, err);
         } else {
@@ -179,11 +179,11 @@ const find =  (tableName, value, results) => {
 /**
  *@description: Search for a record when the column contains a word
  * @param {string} tableName the name of the table
- * @param column string
- * @param words string
- * @param results callable
+ * @param {string}  column the column name for searching
+ * @param {string|number} words the word to search
+ * @param {function} results callable
  */
-const search =  (tableName,[column, words] ,results) => {
+const search =  (tableName,column, words ,results) => {
     database.query(`SELECT * FROM ${tableName} WHERE ${column} LIKE '%${words}%'` , function (err, rows) {
         if (err) {
             results(null, err);
@@ -204,7 +204,24 @@ const search =  (tableName,[column, words] ,results) => {
  * @param {function}  results
  */
 const update = (tableName, [value, id, column], results) => {
-    let columns = Object.keys(value);
+    const {conditions, values}= hydrateObject(value);
+    values.push(id);
+    database.query(`UPDATE ${tableName} SET ${conditions} WHERE ${column}=?`,values, function (err, rows) {
+        if (err) {
+            results(null, err);
+        } else {
+            results(null, rows);
+        }
+
+    });
+};
+
+/**
+ *
+ * @param {Object} data
+ */
+function hydrateObject(data) {
+    let columns = Object.keys(data);
     const columnsCount = columns.length - 1;
     let conditions ='';
     columns.forEach((column, index) => {
@@ -216,22 +233,28 @@ const update = (tableName, [value, id, column], results) => {
             conditions += `${column} = ?,`;
         }
     })
-    const values = Object.values(value);
-    values.push(id);
-    database.query(`UPDATE ${tableName} SET ${conditions} WHERE ${column}=?`,values, function (err) {
-        if (err) {
-            results(null, err);
-        } else {
-            findLastRows([tableName, id], (err, rows) => {
-                if (err) {
-                    results(null, err);
-                } else {
-                    results(null, rows);
-                }
-            });
+    const values = Object.values(data);
+    return {conditions, values};
+}
+/**
+ *
+ * @param {Object} data
+ */
+function getConditions(data) {
+    let columns = Object.keys(data);
+    const columnsCount = columns.length - 1;
+    let conditions ='';
+    columns.forEach((column, index) => {
+        if(columnsCount === index)
+        {
+            conditions += `${column} = ?`;
         }
-
-    });
-};
+        else{
+            conditions += `${column} = ? AND `;
+        }
+    })
+    const values = Object.values(data);
+    return {conditions, values};
+}
 
 module.exports = {findLastRows,findLimitBy, update, add, findAll, findAllBy, count, findBy, find, search, deleteItem};
