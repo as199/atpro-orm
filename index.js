@@ -1,7 +1,7 @@
 const database = require('./services/atpro.database');
 
 /**
- * create new record
+ * @description: Add a new record to a table
  * @param {string} tableName the name of the table
  * @param {Object} data the data to insert
  * @param {function} results callable
@@ -24,6 +24,7 @@ const add =  (tableName,data, results) => {
 }
 
 /**
+ * @description: Find the last record in a table
  * @param {string} tableName the name of the table
  * @param {string} column the column name default id
  * @param {function} results callable
@@ -43,6 +44,7 @@ const findLastRows = (tableName, column = 'id', results) => {
 
 
 /**
+ * @description: Delete a record from a table
  * @param {string} tableName the name of the table
  * @param {string} column the name of the column
  * @param {number|string} value the value of the column
@@ -60,6 +62,7 @@ const deleteItem = (tableName,[value, column = 'id'], results) => {
 }
 
 /**
+ * @description: Count the number of records in a table
  * @param {string} tableName the name of the table
  * @param column
  * @param value
@@ -80,11 +83,11 @@ const count = ([tableName, column=null, value=null], results) =>{
 
 
 /**
+ * @description: Find all items in a table
  * @param {string} tableName the name of the table
- * @param all
  * @param results
  */
-const findAll =  ([tableName], results) => {
+const findAll =  (tableName, results) => {
     let sql = `SELECT * FROM ${tableName}`;
     database.query(sql, function (err, rows) {
         if (err) {
@@ -98,14 +101,14 @@ const findAll =  ([tableName], results) => {
 
 
 /**
- *
+ *@description: Find all records in a table that match the conditions
  * @param {string} tableName the name of the table
- * @param column
- * @param value
+ * @param {string} column the column name for searching
+ * @param {number| string} value the value of the column
  * @param limit
  * @param results
  */
-const findAllBy =  (tableName,[column, value, order=0], results) => {
+const findAllBy =  (tableName,[column, value], results) => {
     let sql =`SELECT * FROM ${tableName} WHERE ${column}=?`;
     database.query(sql,[value], function (err, rows) {
         if (err) {
@@ -118,7 +121,7 @@ const findAllBy =  (tableName,[column, value, order=0], results) => {
 }
 
 /**
- *
+ *@description: Find all records in a table that match the limit conditions
  * @param {string} tableName the name of the table
  * @param {string} column the column name for ordering the results
  * @param {string} limit the limit of the results
@@ -138,7 +141,7 @@ const findLimitBy =  (tableName,[column, limit], results) => {
 
 
 /**
- *
+ *@description: Find all records in a table that match conditions
  * @param {string} tableName the name of the table
  * @param {Object} column
  * @param results
@@ -158,7 +161,7 @@ const findBy =  (tableName,column, results) => {
 
 
 /**
- *
+ *@description: find one record in a table by primary key column
  * @param {string} tableName the name of the table
  * @param {string} column the value of the column default id
  * @param {string|number} value the value of the column
